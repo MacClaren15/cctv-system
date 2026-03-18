@@ -28,6 +28,9 @@ body {
 
 /* Header */
 header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   background: linear-gradient(
     135deg,
     var(--primary-color) 0%,
@@ -83,6 +86,9 @@ header h1 {
 
 /* Navigation */
 nav {
+  position: sticky;
+  top: 80px;
+  z-index: 99;
   background-color: var(--gray-dark);
   padding: 0;
   box-shadow: var(--shadow);
@@ -229,6 +235,53 @@ section h2 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   gap: 1.5rem;
+}
+
+/* Camera Grid Layout Variants */
+.cameras-grid.grid-1x1 {
+  grid-template-columns: 1fr;
+}
+
+.cameras-grid.grid-1x2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.cameras-grid.grid-2x2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Layout Toggle Buttons */
+.layout-toggle {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--gray-light);
+  border-radius: 4px;
+  overflow: hidden;
+  background: white;
+}
+
+.layout-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: white;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 500;
+  border-right: 1px solid var(--gray-light);
+}
+
+.layout-btn:last-child {
+  border-right: none;
+}
+
+.layout-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.layout-btn.active {
+  background: var(--primary-color);
+  color: white;
 }
 
 .camera-card {

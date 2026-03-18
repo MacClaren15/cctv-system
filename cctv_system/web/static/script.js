@@ -30,6 +30,25 @@ function setupEventListeners() {
   document
     .getElementById("btn-refresh-events")
     .addEventListener("click", loadEvents);
+
+  // Setup layout toggle buttons
+  const layoutBtns = document.querySelectorAll(".layout-btn");
+  const savedLayout = localStorage.getItem("cameraLayout") || "grid-1x2";
+
+  layoutBtns.forEach((btn) => {
+    btn.addEventListener("click", function () {
+      const layout = this.getAttribute("data-layout");
+      setupCameraLayout(layout);
+    });
+
+    // Set active button based on saved layout
+    if (btn.getAttribute("data-layout") === savedLayout) {
+      btn.classList.add("active");
+    }
+  });
+
+  // Apply saved layout on load
+  applyLayout(savedLayout);
 }
 
 // Load all dashboard data
@@ -359,6 +378,35 @@ function showNotification(message, type = "info") {
   // In a real app, you'd use a toast notification library
   console.log(`[${type.toUpperCase()}] ${message}`);
   alert(message);
+}
+
+// Camera Layout Management
+function setupCameraLayout(layout) {
+  applyLayout(layout);
+  localStorage.setItem("cameraLayout", layout);
+  updateLayoutButtons(layout);
+}
+
+function applyLayout(layout) {
+  const camerasGrid = document.getElementById("cameras-grid");
+
+  // Remove all layout classes
+  camerasGrid.classList.remove("grid-1x1", "grid-1x2", "grid-2x2");
+
+  // Add the selected layout class
+  camerasGrid.classList.add(layout);
+}
+
+function updateLayoutButtons(layout) {
+  const layoutBtns = document.querySelectorAll(".layout-btn");
+
+  layoutBtns.forEach((btn) => {
+    if (btn.getAttribute("data-layout") === layout) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
 }
 
 // Cleanup on page unload

@@ -509,7 +509,9 @@
             value="/media/usb"
           />
           <p class="setting-description">
-            Path to store recordings (USB drive recommended). Examples: /media/usb (Linux), /mnt/usb (Linux), C:\USB (Windows), D:\ (Windows). Leave empty to use default (./data/recordings).
+            Path to store recordings (USB drive recommended). Examples:
+            /media/usb (Linux), /mnt/usb (Linux), C:\USB (Windows), D:\
+            (Windows). Leave empty to use default (./data/recordings).
           </p>
         </div>
 
@@ -522,7 +524,8 @@
             <span class="toggle-slider"></span>
           </label>
           <p class="setting-description">
-            If USB drive is unavailable, automatically save to default directory (./data/recordings).
+            If USB drive is unavailable, automatically save to default directory
+            (./data/recordings).
           </p>
         </div>
       </div>
@@ -854,7 +857,8 @@
               document.getElementById("keepDaysSlider").value,
             ),
             storage_path: document.getElementById("recordingPath").value,
-            fallback_storage: document.getElementById("fallbackStorage").checked,
+            fallback_storage:
+              document.getElementById("fallbackStorage").checked,
           },
           alerts: {
             sound: document.getElementById("soundAlerts").checked,
@@ -880,7 +884,24 @@
           },
           body: JSON.stringify(settings),
         })
-          .then((response) => response.json())
+          .then((response) => {
+            if (!response.ok) {
+              return response
+                .json()
+                .then((data) => {
+                  throw new Error(
+                    data.error ||
+                      `HTTP ${response.status}: ${response.statusText}`,
+                  );
+                })
+                .catch((jsonError) => {
+                  throw new Error(
+                    `HTTP ${response.status}: ${response.statusText}`,
+                  );
+                });
+            }
+            return response.json();
+          })
           .then((data) => {
             if (data.success) {
               showAlert("✓ Settings saved successfully!", "success");
@@ -893,6 +914,7 @@
           })
           .catch((error) => {
             showAlert("Error saving settings: " + error.message, "error");
+            console.error("Settings save error:", error);
           });
       }
 
