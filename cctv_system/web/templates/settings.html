@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCTV System - Settings</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .settings-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .settings-section {
+            background: white;
+            border-radius: 8px;
+            margin: 20px 0;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .settings-section h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        
+        .setting-item {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .setting-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .setting-value {
+            color: #007bff;
+            font-weight: bold;
+        }
+        
+        .setting-description {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #007bff;
+            cursor: pointer;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #007bff;
+            cursor: pointer;
+            border: none;
+        }
+        
+        select, input[type="number"], input[type="text"] {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+        }
+        
+        .toggle-switch {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .toggle-switch input {
+            display: none;
+        }
+        
+        .toggle-slider {
+            width: 50px;
+            height: 24px;
+            background-color: #ccc;
+            border-radius: 12px;
+            position: relative;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+        
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #28a745;
+        }
+        
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: white;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+        
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translateX(26px);
+        }
+        
+        .button-group {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-save {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-save:hover {
+            background-color: #218838;
+        }
+        
+        .btn-reset {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-reset:hover {
+            background-color: #5a6268;
+        }
+        
+        .btn-default {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-default:hover {
+            background-color: #0056b3;
+        }
+        
+        .alert {
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .alert.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .slider-values {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .value-card {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        
+        .value-card-label {
+            font-size: 0.85em;
+            color: #666;
+        }
+        
+        .value-card-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            color: #007bff;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-home">CCTV System</a>
+            <ul class="nav-menu">
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/settings" class="active">Settings</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="settings-container">
+        <h1>System Settings</h1>
+        
+        <div id="alertMessage" class="alert"></div>
+        <div id="loadingMessage" class="loading"><p>Loading settings...</p></div>
+
+        <!-- Camera Settings -->
+        <div class="settings-section">
+            <h2>📹 Camera Settings</h2>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Frame Rate (FPS)</span>
+                    <span class="setting-value" id="fpsValue">30</span>
+                </div>
+                <input type="range" id="frameRateSlider" min="5" max="60" value="30" step="1">
+                <p class="setting-description">Adjust the number of frames per second. Higher values = better quality but more CPU usage. Lower values = smoother performance.</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Resolution</span>
+                </div>
+                <select id="resolution">
+                    <option value="320x240">Low (320x240)</option>
+                    <option value="640x480" selected>Medium (640x480)</option>
+                    <option value="1280x720">High (1280x720)</option>
+                    <option value="1920x1080">Full HD (1920x1080)</option>
+                </select>
+                <p class="setting-description">Higher resolution improves quality but requires more processing power.</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Brightness</span>
+                    <span class="setting-value" id="brightnessValue">50</span>
+                </div>
+                <input type="range" id="brightnessSlider" min="0" max="100" value="50" step="1">
+                <p class="setting-description">Adjust video brightness. 0 = very dark, 100 = very bright.</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Contrast</span>
+                    <span class="setting-value" id="contrastValue">50</span>
+                </div>
+                <input type="range" id="contrastSlider" min="0" max="100" value="50" step="1">
+                <p class="setting-description">Adjust contrast between light and dark areas. 50 = normal, higher = more contrast.</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Saturation</span>
+                    <span class="setting-value" id="saturationValue">50</span>
+                </div>
+                <input type="range" id="saturationSlider" min="0" max="100" value="50" step="1">
+                <p class="setting-description">Adjust color saturation. 0 = grayscale, 50 = normal, 100 = very vibrant.</p>
+            </div>
+        </div>
+
+        <!-- Motion Detection Settings -->
+        <div class="settings-section">
+            <h2>⚡ Motion Detection Settings</h2>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Motion Detection</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="motionEnabled" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+                <p class="setting-description">Enable or disable motion detection system.</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Detection Algorithm</span>
+                </div>
+                <select id="motionMethod">
+                    <option value="background_subtraction" selected>Background Subtraction (MOG2)</option>
+                    <option value="frame_difference">Frame Difference</option>
+                    <option value="optical_flow">Optical Flow</option>
+                </select>
+                <p class="setting-description">
+                    <strong>MOG2:</strong> Best overall, detects moving objects. 
+                    <strong>Frame Diff:</strong> Fastest, detects any change. 
+                    <strong>Optical Flow:</strong> Most accurate motion direction.
+                </p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Sensitivity</span>
+                    <span class="setting-value" id="sensitivityValue">50</span>
+                </div>
+                <input type="range" id="sensitivitySlider" min="10" max="90" value="50" step="5">
+                <p class="setting-description">Lower = More sensitive (catches small movements), Higher = Less sensitive (prevents false detections). Recommended: 30-60.</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Motion Threshold</span>
+                    <span class="setting-value" id="thresholdValue">500</span>
+                </div>
+                <input type="range" id="thresholdSlider" min="100" max="2000" value="500" step="100">
+                <p class="setting-description">Minimum number of pixels that must change to trigger motion detection.</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Motion Alert Enabled</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="motionAlert" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+                <p class="setting-description">Enable alerts when motion is detected.</p>
+            </div>
+        </div>
+
+        <!-- Recording Settings -->
+        <div class="settings-section">
+            <h2>🎥 Recording Settings</h2>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Auto Recording</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="autoRecording">
+                    <span class="toggle-slider"></span>
+                </label>
+                <p class="setting-description">Automatically record video when motion is detected.</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Recording Duration (seconds)</span>
+                    <span class="setting-value" id="recordDuration">30</span>
+                </div>
+                <input type="range" id="recordDurationSlider" min="10" max="300" value="30" step="10">
+                <p class="setting-description">How long to record each motion detection event.</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Keep Recordings (days)</span>
+                    <span class="setting-value" id="keepDays">7</span>
+                </div>
+                <input type="range" id="keepDaysSlider" min="1" max="30" value="7" step="1">
+                <p class="setting-description">Automatically delete recordings older than this many days.</p>
+            </div>
+        </div>
+
+        <!-- Notification Settings -->
+        <div class="settings-section">
+            <h2>🔔 Notification Settings</h2>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Sound Notifications</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="soundAlerts">
+                    <span class="toggle-slider"></span>
+                </label>
+                <p class="setting-description">Play sound when motion is detected.</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Email Notifications</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="emailAlerts">
+                    <span class="toggle-slider"></span>
+                </label>
+                <p class="setting-description">Send email alerts for motion events.</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Email Address</span>
+                </div>
+                <input type="email" id="emailAddress" placeholder="your@email.com">
+                <p class="setting-description">Where to send notification emails.</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Alert Cooldown (seconds)</span>
+                    <span class="setting-value" id="alertCooldownValue">30</span>
+                </div>
+                <input type="range" id="alertCooldownSlider" min="10" max="300" value="30" step="10">
+                <p class="setting-description">Minimum time between alerts to prevent spam. (30 seconds prevents 2+ alerts per minute)</p>
+            </div>
+        </div>
+
+        <!-- Advanced Settings -->
+        <div class="settings-section">
+            <h2>⚙️ Advanced Settings</h2>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Debug Mode</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="debugMode">
+                    <span class="toggle-slider"></span>
+                </label>
+                <p class="setting-description">Enable detailed logging for troubleshooting.</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>HTTP Server Port</span>
+                </div>
+                <input type="number" id="webPort" value="5000" min="1024" max="65535">
+                <p class="setting-description">Web server port (requires system restart to apply).</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Buffer Size</span>
+                    <span class="setting-value" id="bufferSizeValue">5</span>
+                </div>
+                <input type="range" id="bufferSizeSlider" min="1" max="30" value="5" step="1">
+                <p class="setting-description">Number of frames to keep in buffer. Higher = more responsive but more memory.</p>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="button-group">
+            <button class="btn-save" onclick="saveSettings()">💾 Save Settings</button>
+            <button class="btn-default" onclick="resetToDefaults()">🔄 Reset to Defaults</button>
+            <button class="btn-reset" onclick="location.href='/'">❌ Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // Load settings on page load
+        document.addEventListener('DOMContentLoaded', loadSettings);
+
+        // Update value displays on slider change
+        document.getElementById('frameRateSlider').addEventListener('input', function() {
+            document.getElementById('fpsValue').textContent = this.value;
+        });
+
+        document.getElementById('brightnessSlider').addEventListener('input', function() {
+            document.getElementById('brightnessValue').textContent = this.value;
+        });
+
+        document.getElementById('contrastSlider').addEventListener('input', function() {
+            document.getElementById('contrastValue').textContent = this.value;
+        });
+
+        document.getElementById('saturationSlider').addEventListener('input', function() {
+            document.getElementById('saturationValue').textContent = this.value;
+        });
+
+        document.getElementById('sensitivitySlider').addEventListener('input', function() {
+            document.getElementById('sensitivityValue').textContent = this.value;
+        });
+
+        document.getElementById('thresholdSlider').addEventListener('input', function() {
+            document.getElementById('thresholdValue').textContent = this.value;
+        });
+
+        document.getElementById('recordDurationSlider').addEventListener('input', function() {
+            document.getElementById('recordDuration').textContent = this.value;
+        });
+
+        document.getElementById('keepDaysSlider').addEventListener('input', function() {
+            document.getElementById('keepDays').textContent = this.value;
+        });
+
+        document.getElementById('alertCooldownSlider').addEventListener('input', function() {
+            document.getElementById('alertCooldownValue').textContent = this.value;
+        });
+
+        document.getElementById('bufferSizeSlider').addEventListener('input', function() {
+            document.getElementById('bufferSizeValue').textContent = this.value;
+        });
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alertMessage');
+            alert.textContent = message;
+            alert.className = 'alert ' + type;
+            setTimeout(() => {
+                alert.className = 'alert';
+            }, 5000);
+        }
+
+        function loadSettings() {
+            document.getElementById('loadingMessage').classList.add('active');
+            
+            fetch('/api/v1/settings')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loadingMessage').classList.remove('active');
+                    
+                    // Populate form with settings
+                    if (data.camera) {
+                        document.getElementById('frameRateSlider').value = data.camera.fps || 30;
+                        document.getElementById('fpsValue').textContent = data.camera.fps || 30;
+                        document.getElementById('brightnessSlider').value = data.camera.brightness || 50;
+                        document.getElementById('brightnessValue').textContent = data.camera.brightness || 50;
+                        document.getElementById('contrastSlider').value = data.camera.contrast || 50;
+                        document.getElementById('contrastValue').textContent = data.camera.contrast || 50;
+                        document.getElementById('saturationSlider').value = data.camera.saturation || 50;
+                        document.getElementById('saturationValue').textContent = data.camera.saturation || 50;
+                    }
+                    
+                    if (data.motion) {
+                        document.getElementById('motionEnabled').checked = data.motion.enabled !== false;
+                        document.getElementById('motionMethod').value = data.motion.method || 'background_subtraction';
+                        document.getElementById('sensitivitySlider').value = data.motion.sensitivity * 100 || 50;
+                        document.getElementById('sensitivityValue').textContent = (data.motion.sensitivity * 100 || 50).toFixed(0);
+                        document.getElementById('thresholdSlider').value = data.motion.threshold || 500;
+                        document.getElementById('thresholdValue').textContent = data.motion.threshold || 500;
+                        document.getElementById('motionAlert').checked = data.motion.alert !== false;
+                    }
+                    
+                    if (data.recording) {
+                        document.getElementById('autoRecording').checked = data.recording.enabled !== false;
+                        document.getElementById('recordDurationSlider').value = data.recording.duration || 30;
+                        document.getElementById('recordDuration').textContent = data.recording.duration || 30;
+                        document.getElementById('keepDaysSlider').value = data.recording.keep_days || 7;
+                        document.getElementById('keepDays').textContent = data.recording.keep_days || 7;
+                    }
+                    
+                    if (data.alerts) {
+                        document.getElementById('soundAlerts').checked = data.alerts.sound !== false;
+                        document.getElementById('emailAlerts').checked = data.alerts.email !== false;
+                        document.getElementById('emailAddress').value = data.alerts.email_address || '';
+                        document.getElementById('alertCooldownSlider').value = data.alerts.cooldown || 30;
+                        document.getElementById('alertCooldownValue').textContent = data.alerts.cooldown || 30;
+                    }
+                    
+                    if (data.advanced) {
+                        document.getElementById('debugMode').checked = data.advanced.debug !== false;
+                        document.getElementById('webPort').value = data.advanced.port || 5000;
+                        document.getElementById('bufferSizeSlider').value = data.advanced.buffer_size || 5;
+                        document.getElementById('bufferSizeValue').textContent = data.advanced.buffer_size || 5;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('loadingMessage').classList.remove('active');
+                    showAlert('Error loading settings: ' + error.message, 'error');
+                });
+        }
+
+        function saveSettings() {
+            const settings = {
+                camera: {
+                    fps: parseInt(document.getElementById('frameRateSlider').value),
+                    brightness: parseInt(document.getElementById('brightnessSlider').value),
+                    contrast: parseInt(document.getElementById('contrastSlider').value),
+                    saturation: parseInt(document.getElementById('saturationSlider').value)
+                },
+                motion: {
+                    enabled: document.getElementById('motionEnabled').checked,
+                    method: document.getElementById('motionMethod').value,
+                    sensitivity: parseInt(document.getElementById('sensitivitySlider').value) / 100,
+                    threshold: parseInt(document.getElementById('thresholdSlider').value),
+                    alert: document.getElementById('motionAlert').checked
+                },
+                recording: {
+                    enabled: document.getElementById('autoRecording').checked,
+                    duration: parseInt(document.getElementById('recordDurationSlider').value),
+                    keep_days: parseInt(document.getElementById('keepDaysSlider').value)
+                },
+                alerts: {
+                    sound: document.getElementById('soundAlerts').checked,
+                    email: document.getElementById('emailAlerts').checked,
+                    email_address: document.getElementById('emailAddress').value,
+                    cooldown: parseInt(document.getElementById('alertCooldownSlider').value)
+                },
+                advanced: {
+                    debug: document.getElementById('debugMode').checked,
+                    port: parseInt(document.getElementById('webPort').value),
+                    buffer_size: parseInt(document.getElementById('bufferSizeSlider').value)
+                }
+            };
+
+            fetch('/api/v1/settings', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(settings)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('✓ Settings saved successfully!', 'success');
+                } else {
+                    showAlert('Error: ' + (data.message || 'Failed to save settings'), 'error');
+                }
+            })
+            .catch(error => {
+                showAlert('Error saving settings: ' + error.message, 'error');
+            });
+        }
+
+        function resetToDefaults() {
+            if (confirm('Are you sure you want to reset all settings to defaults?')) {
+                fetch('/api/v1/settings/reset', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showAlert('✓ Settings reset to defaults', 'success');
+                            setTimeout(loadSettings, 1000);
+                        } else {
+                            showAlert('Error resetting settings', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        showAlert('Error: ' + error.message, 'error');
+                    });
+            }
+        }
+    </script>
+</body>
+</html>

@@ -358,6 +358,125 @@ def control_restart():
         return jsonify({"error": str(e)}), 500
 
 
+# ==================== SETTINGS ENDPOINTS ====================
+
+@app.route('/api/v1/settings', methods=['GET'])
+@require_auth
+def get_settings():
+    """Get all system settings"""
+    try:
+        from core.processor import get_processor
+        proc = get_processor()
+        
+        settings = {
+            "camera": {
+                "fps": config.CAMERAS[0].get('fps', 30) if config.CAMERAS else 30,
+                "brightness": 50,  # Default value
+                "contrast": 50,
+                "saturation": 50
+            },
+            "motion": {
+                "enabled": config.MOTION_DETECTION.get('enabled', True),
+                "method": config.MOTION_DETECTION.get('method', 'background_subtraction'),
+                "sensitivity": config.MOTION_DETECTION.get('sensitivity', 0.3),
+                "threshold": config.MOTION_DETECTION.get('threshold', 1000),
+                "alert": config.ALERTS.get('motion_alert', True)
+            },
+            "recording": {
+                "enabled": config.RECORDING.get('enabled', False),
+                "duration": config.RECORDING.get('duration_seconds', 30),
+                "keep_days": config.RECORDING.get('keep_days', 7)
+            },
+            "alerts": {
+                "sound": config.ALERTS.get('sound', False),
+                "email": config.ALERTS.get('email', False),
+                "email_address": config.ALERTS.get('email_address', ''),
+                "cooldown": config.ALERTS.get('cooldown_seconds', 30)
+            },
+            "advanced": {
+                "debug": config.WEB.get('debug', False),
+                "port": config.WEB.get('port', 5000),
+                "buffer_size": 5
+            }
+        }
+        
+        return jsonify(settings), 200
+    except Exception as e:
+        logger.error(f"Error getting settings: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/v1/settings', methods=['PUT'])
+@require_auth
+def update_settings():
+    """Update system settings"""
+    try:
+        data = request.get_json()
+        
+        # Update camera settings
+        if 'camera' in data and config.CAMERAS:
+            config.CAMERAS[0]['fps'] = data['camera'].get('fps', 30)
+            config.CAMERAS[0]['brightness'] = data['camera'].get('brightness', 50)
+        
+        # Update motion detection settings
+        if 'motion' in data:
+            config.MOTION_DETECTION['enabled'] = data['motion'].get('enabled', True)
+            config.MOTION_DETECTION['method'] = data['motion'].get('method', 'background_subtraction')
+            config.MOTION_DETECTION['sensitivity'] = data['motion'].get('sensitivity', 0.3)
+            config.MOTION_DETECTION['threshold'] = data['motion'].get('threshold', 1000)
+        
+        # Update recording settings
+        if 'recording' in data:
+            config.RECORDING['enabled'] = data['recording'].get('enabled', False)
+            config.RECORDING['duration_seconds'] = data['recording'].get('duration', 30)
+            config.RECORDING['keep_days'] = data['recording'].get('keep_days', 7)
+        
+        # Update alert settings
+        if 'alerts' in data:
+            config.ALERTS['sound'] = data['alerts'].get('sound', False)
+            config.ALERTS['email'] = data['alerts'].get('email', False)
+            config.ALERTS['email_address'] = data['alerts'].get('email_address', '')
+            config.ALERTS['cooldown_seconds'] = data['alerts'].get('cooldown', 30)
+        
+        logger.info("Settings updated successfully")
+        return jsonify({
+            "success": True,
+            "message": "Settings saved successfully"
+        }), 200
+    except Exception as e:
+        logger.error(f"Error updating settings: {e}")
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+
+
+@app.route('/api/v1/settings/reset', methods=['POST'])
+@require_auth
+def reset_settings():
+    """Reset settings to defaults"""
+    try:
+        # Reset to config defaults
+        config.reload()
+        logger.info("Settings reset to defaults")
+        return jsonify({
+            "success": True,
+            "message": "Settings reset to defaults"
+        }), 200
+    except Exception as e:
+        logger.error(f"Error resetting settings: {e}")
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+
+
+@app.route('/settings')
+def settings_page():
+    """Settings page"""
+    return render_template('settings.html')
+
+
 # ==================== WEB DASHBOARD ====================
 
 @app.route('/')

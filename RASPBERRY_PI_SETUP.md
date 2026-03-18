@@ -85,6 +85,7 @@ python main.py
 ```
 
 The web dashboard will be available at:
+
 ```
 http://raspberrypi.local:5000
 # or
@@ -104,6 +105,7 @@ sudo nano /etc/systemd/system/cctv-system.service
 ```
 
 Update these lines in the service file:
+
 ```ini
 User=pi
 WorkingDirectory=/home/pi/projects/cctv-system/cctv_system
@@ -111,6 +113,7 @@ ExecStart=/home/pi/projects/cctv-system/cctv_system/venv/bin/python main.py
 ```
 
 Then:
+
 ```bash
 # Enable and start service
 sudo systemctl daemon-reload
@@ -136,6 +139,7 @@ crontab -e
 ## Connect Camera to Raspberry Pi
 
 ### USB Webcam
+
 ```bash
 # Simply plug in USB camera
 # System will auto-detect at index 0
@@ -171,24 +175,25 @@ nano config.yaml
 ```
 
 Key settings for Pi:
+
 ```yaml
 CAMERAS:
   - id: 0
     name: pi_camera
-    source: 0  # 0 for USB, "libcamera" for Pi Camera
+    source: 0 # 0 for USB, "libcamera" for Pi Camera
 
 MOTION_DETECTION:
   enabled: true
-  method: background_subtraction  # MOG2 is fastest
+  method: background_subtraction # MOG2 is fastest
   sensitivity: 0.3
 
 OBJECT_DETECTION:
-  enabled: false  # Disable on Pi (needs torch/ultralytics)
+  enabled: false # Disable on Pi (needs torch/ultralytics)
 
 WEB:
-  host: 0.0.0.0  # Accessible from all IPs
+  host: 0.0.0.0 # Accessible from all IPs
   port: 5000
-  debug: false    # Production mode
+  debug: false # Production mode
 ```
 
 ## Performance Tips for Pi
@@ -218,6 +223,7 @@ MOTION_DETECTION = {
 ## Troubleshooting on Pi
 
 ### Low FPS / Slow Performance
+
 ```bash
 # Check CPU temperature
 vcgencmd measure_temp
@@ -229,6 +235,7 @@ vcgencmd measure_temp
 ```
 
 ### Camera Not Detected
+
 ```bash
 # Check for USB camera
 lsusb
@@ -243,6 +250,7 @@ libcamera-hello -t 3
 ```
 
 ### Out of Memory
+
 ```bash
 # Monitor memory usage
 free -h
@@ -253,6 +261,7 @@ free -h
 ```
 
 ### Port Already in Use
+
 ```bash
 # Check what's using port 5000
 sudo lsof -i :5000
@@ -266,6 +275,7 @@ sudo kill -9 <PID>
 ## Access from Remote
 
 ### Local Network
+
 ```
 http://raspberrypi.local:5000
 # or
@@ -273,6 +283,7 @@ http://192.168.x.x:5000  # Your Pi's IP
 ```
 
 ### Find Your Pi's IP
+
 ```bash
 hostname -I
 # or on your main computer:
@@ -280,7 +291,9 @@ ping raspberrypi.local
 ```
 
 ### Port Forwarding (Advanced)
+
 For access outside your network:
+
 ```bash
 # Use ngrok for free tunneling
 pip install pyngrok
@@ -290,17 +303,20 @@ pip install pyngrok
 ## Monitor System
 
 ### Check if running
+
 ```bash
 ps aux | grep python
 curl http://localhost:5000/api/v1/health
 ```
 
 ### View logs
+
 ```bash
 tail -f data/logs/cctv_system.log
 ```
 
 ### Stop the system
+
 ```bash
 # If running in foreground
 Ctrl+C
@@ -312,6 +328,7 @@ sudo systemctl stop cctv-system
 ## Storage Considerations
 
 Recordings take space. Monitor:
+
 ```bash
 # Check disk space
 df -h
