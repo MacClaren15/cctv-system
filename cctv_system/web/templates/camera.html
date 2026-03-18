@@ -76,7 +76,12 @@
     <main class="camera-full-container">
       <!-- Full-Screen Camera Stream -->
       <div class="camera-full-stream">
-        <img id="camera-stream" src="" alt="Live camera stream" />
+        <iframe 
+          id="camera-stream" 
+          src="/api/v1/cameras/{{ camera_name }}/stream" 
+          style="width: 100%; height: 100%; border: none; background: #000;"
+          title="Live camera stream">
+        </iframe>
       </div>
 
       <!-- Camera Details -->

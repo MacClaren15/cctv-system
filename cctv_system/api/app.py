@@ -385,7 +385,9 @@ def get_settings():
             "recording": {
                 "enabled": config.RECORDING.get('enabled', False),
                 "duration": config.RECORDING.get('duration_seconds', 30),
-                "keep_days": config.RECORDING.get('keep_days', 7)
+                "keep_days": config.RECORDING.get('keep_days', 7),
+                "storage_path": config.RECORDING.get('storage_path', '/media/usb'),
+                "fallback_storage": config.RECORDING.get('fallback_storage', True)
             },
             "alerts": {
                 "sound": config.ALERTS.get('sound', False),
@@ -430,6 +432,8 @@ def update_settings():
             config.RECORDING['enabled'] = data['recording'].get('enabled', False)
             config.RECORDING['duration_seconds'] = data['recording'].get('duration', 30)
             config.RECORDING['keep_days'] = data['recording'].get('keep_days', 7)
+            config.RECORDING['storage_path'] = data['recording'].get('storage_path', '/media/usb')
+            config.RECORDING['fallback_storage'] = data['recording'].get('fallback_storage', True)
         
         # Update alert settings
         if 'alerts' in data:

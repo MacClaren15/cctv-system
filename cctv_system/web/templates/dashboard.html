@@ -129,7 +129,45 @@
         &copy; 2025 CCTV Motion Detection System | Built with Computer Vision
       </p>
     </footer>
+    
+    <!-- Hidden audio element for sound alerts -->
+    <audio id="alertSound" preload="auto">
+      <source src="data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA==" type="audio/wav">
+    </audio>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+      // Sound alert function
+      window.playAlertSound = function() {
+        try {
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          
+          // Beep pattern
+          oscillator.frequency.value = 800;
+          gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+          
+          oscillator.start(audioContext.currentTime);
+          oscillator.stop(audioContext.currentTime + 0.1);
+        } catch (e) {
+          console.log("Audio context not available");
+        }
+      };
+      
+      // Store setting to check if sound is enabled
+      window.soundAlertsEnabled = localStorage.getItem('soundAlerts') === 'true';
+      
+      // Listen for sound alert toggle
+      document.addEventListener('soundAlertToggle', function(e) {
+        window.soundAlertsEnabled = e.detail.enabled;
+        localStorage.setItem('soundAlerts', e.detail.enabled);
+      });
+    </script>
+
   </body>
 </html>
