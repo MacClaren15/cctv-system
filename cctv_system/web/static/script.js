@@ -130,7 +130,7 @@ function createCameraCard(name, camera) {
 
   card.innerHTML = `
         <div class="camera-stream">
-            <img src="${API_BASE}/cameras/${name}/stream" alt="${name}">
+            <iframe src="${API_BASE}/cameras/${name}/stream" frameborder="0" title="${name}"></iframe>
         </div>
         <div class="camera-info">
             <h3>${camera.name || name}</h3>
