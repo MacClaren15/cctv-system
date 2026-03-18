@@ -281,5 +281,6 @@ class AdvancedMotionDetector(MotionDetector):
             "contours": contours,
             "motion_ratio": ratio,
             "motion_trend": motion_trend,
+            "contours_count": len(contours),
             "history_length": len(self.motion_history)
         }
