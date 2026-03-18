@@ -9,6 +9,7 @@ import cv2
 import logging
 from datetime import datetime, timedelta
 from functools import wraps
+from pathlib import Path
 
 from config import config
 from core.processor import get_processor
@@ -20,8 +21,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Create Flask app
-app = Flask(__name__)
+# Get the project root directory
+project_root = Path(__file__).parent.parent
+
+# Create Flask app with correct template and static paths
+app = Flask(
+    __name__,
+    template_folder=str(project_root / 'web' / 'templates'),
+    static_folder=str(project_root / 'web' / 'static')
+)
 CORS(app)
 
 # Configuration
