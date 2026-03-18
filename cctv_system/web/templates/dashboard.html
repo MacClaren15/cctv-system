@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CCTV Motion Detection System</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+  <body>
+    <header>
+      <h1>🎥 CCTV Motion Detection System</h1>
+      <div id="status-indicator" class="status-indicator">
+        <span id="status-text">Loading...</span>
+      </div>
+    </header>
+
+    <nav>
+      <ul>
+        <li><a href="/">Dashboard</a></li>
+        <li><a href="#cameras">Cameras</a></li>
+        <li><a href="#events">Events</a></li>
+        <li><a href="#alerts">Alerts</a></li>
+        <li><a href="#stats">Statistics</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <!-- Control Panel -->
+      <section class="control-panel">
+        <h2>System Control</h2>
+        <div class="controls">
+          <button id="btn-start" class="btn btn-success">Start System</button>
+          <button id="btn-stop" class="btn btn-danger">Stop System</button>
+          <button id="btn-restart" class="btn btn-warning">
+            Restart System
+          </button>
+        </div>
+      </section>
+
+      <!-- Summary Statistics -->
+      <section class="summary-stats">
+        <h2>Summary</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3>Total Frames</h3>
+            <p id="stat-frames" class="stat-value">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>Motion Events</h3>
+            <p id="stat-motion" class="stat-value">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>Objects Detected</h3>
+            <p id="stat-objects" class="stat-value">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>Alerts Issued</h3>
+            <p id="stat-alerts" class="stat-value">0</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Cameras Section -->
+      <section id="cameras" class="cameras-section">
+        <h2>Active Cameras</h2>
+        <div id="cameras-grid" class="cameras-grid">
+          <!-- Camera cards will be inserted here -->
+        </div>
+      </section>
+
+      <!-- Events Section -->
+      <section id="events" class="events-section">
+        <h2>Recent Events</h2>
+        <div class="events-controls">
+          <select id="event-filter-type">
+            <option value="">All Types</option>
+            <option value="motion">Motion Only</option>
+            <option value="detection">Detection Only</option>
+          </select>
+          <input
+            type="number"
+            id="event-filter-days"
+            min="1"
+            max="30"
+            value="1"
+            placeholder="Days"
+          />
+          <button id="btn-filter-events" class="btn">Filter Events</button>
+          <button id="btn-refresh-events" class="btn">Refresh</button>
+        </div>
+        <table id="events-table" class="event-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Type</th>
+              <th>Camera</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Events will be inserted here -->
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Alerts Section -->
+      <section id="alerts" class="alerts-section">
+        <h2>Recent Alerts</h2>
+        <div id="alerts-list" class="alerts-list">
+          <!-- Alerts will be inserted here -->
+        </div>
+      </section>
+
+      <!-- Statistics Section -->
+      <section id="stats" class="stats-section">
+        <h2>Camera Statistics</h2>
+        <div id="camera-stats" class="camera-stats-grid">
+          <!-- Camera stats will be inserted here -->
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        &copy; 2025 CCTV Motion Detection System | Built with Computer Vision
+      </p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>

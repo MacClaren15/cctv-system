@@ -1,0 +1,28 @@
+# Core Dependencies (Python 3.13 Compatible)
+opencv-python>=4.9.0
+numpy>=1.26.0
+scipy>=1.13.0
+
+# Machine Learning and Object Detection
+torch>=2.2.0
+torchvision>=0.17.0
+ultralytics>=8.2.0
+
+# Web Framework and API
+Flask>=3.0.0
+Flask-CORS>=4.0.0
+Flask-RESTful>=0.3.10
+Flask-SQLAlchemy>=3.1.1
+
+# Database
+SQLAlchemy>=2.0.0
+
+# Utilities
+python-dotenv>=1.0.0
+Pillow>=10.1.0
+requests>=2.31.0
+pyyaml>=6.0.1
+
+# Testing
+pytest>=7.4.3
+pytest-cov>=4.1.0

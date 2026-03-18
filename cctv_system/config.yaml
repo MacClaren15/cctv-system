@@ -1,0 +1,160 @@
+# CCTV System Configuration (YAML Format)
+# Load with: config.load_from_file('config.yaml')
+
+# Application Settings
+APP_NAME: "CCTV Motion Detection System"
+VERSION: "1.0.0"
+DEBUG: false
+
+# Camera Configuration
+CAMERAS:
+  camera_1:
+    enabled: true
+    name: "Front Door"
+    camera_index: 0
+    resolution: [1280, 720]
+    fps: 30
+    rotation: 0
+
+  camera_2:
+    enabled: false
+    name: "Back Porch"
+    camera_index: 1
+    resolution: [1280, 720]
+    fps: 30
+    rotation: 0
+
+# Motion Detection Settings
+MOTION_DETECTION:
+  enabled: true
+  method: "background_subtraction" # Options: background_subtraction, frame_diff, optical_flow
+  sensitivity: 0.3 # 0.1 (very sensitive) to 1.0 (not sensitive)
+  min_area: 500 # Minimum pixels to trigger motion
+  blur_kernel: 21
+  dilate_kernel: 11
+  erode_kernel: 9
+
+# Object Detection Settings
+OBJECT_DETECTION:
+  enabled: true
+  model: "yolov8m" # yolov8n, yolov8s, yolov8m, yolov8l, yolov8x
+  confidence_threshold: 0.5
+  iou_threshold: 0.45
+  device: "cpu" # cpu or cuda
+  classes:
+    - "person"
+    - "car"
+    - "truck"
+    - "bus"
+    - "bicycle"
+    - "motorcycle"
+
+# Recording Settings
+RECORDING:
+  enabled: true
+  record_on_motion: true
+  record_on_detection: true
+  pre_recording_seconds: 10
+  post_recording_seconds: 30
+  output_format: "mp4"
+  codec: "h264"
+  quality: 85
+  storage_path: "./data/recordings"
+
+# Alert Settings
+ALERTS:
+  enabled: true
+  motion_alert: true
+  detection_alert: true
+  alert_cooldown: 60 # Seconds between same alerts
+
+  # Email Alerts
+  email_enabled: false
+  email_recipients:
+    - "admin@example.com"
+  smtp_server: "smtp.gmail.com"
+  smtp_port: 587
+  from_email: "cctv@example.com"
+  from_password: ""
+
+  # Slack Alerts
+  slack_enabled: false
+  slack_webhook: ""
+
+  # Webhook Alerts
+  webhook_enabled: false
+  webhook_url: ""
+
+# Web Interface Settings
+WEB:
+  host: "0.0.0.0"
+  port: 5000
+  debug: false
+  secret_key: "change-me-in-production"
+  ssl_enabled: false
+  cert_path: ""
+  key_path: ""
+
+# Database Settings
+DATABASE:
+  type: "sqlite"
+  host: "localhost"
+  port: 5432
+  name: "cctv_system.db"
+  path: "./data/cctv_system.db"
+  log_events: true
+  retention_days: 30
+  backup_enabled: true
+  backup_path: "./data/backups"
+
+# Logging Settings
+LOGGING:
+  level: "INFO" # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "./data/logs/cctv_system.log"
+  max_bytes: 10485760 # 10MB
+  backup_count: 10
+
+# Performance Settings
+PERFORMANCE:
+  max_threads: 4
+  frame_skip: 1 # Process every Nth frame
+  buffer_size: 100
+  cleanup_interval: 3600 # Seconds between cleanup tasks
+  cache_enabled: true
+
+# API Settings
+API:
+  version: "v1"
+  enable_auth: false
+  api_key: "default-api-key"
+  rate_limit: 1000 # Requests per hour
+  cors_enabled: true
+
+---
+# Configuration Comments:
+#
+# MOTION_DETECTION:
+#   - Sensitivity: Lower = more sensitive (default 0.3 is good for most)
+#   - min_area: Pixels - lower detects more movement (default 500 is reasonable)
+#
+# OBJECT_DETECTION:
+#   - Model size: n=fast, m=balanced, x=slow but accurate
+#   - confidence_threshold: 0.5 is good starting point
+#   - Device: Use "cuda" if you have NVIDIA GPU for 5-10x speedup
+#
+# RECORDING:
+#   - pre_recording_seconds: How long before event to record
+#   - post_recording_seconds: How long after event to record
+#
+# ALERTS:
+#   - alert_cooldown: Prevent alert spam (e.g., don't send same alert within 60s)
+#   - Email/Slack/Webhook: Configure at least one notification method
+#
+# PERFORMANCE:
+#   - frame_skip: Skip frames for speed (e.g., 2=process every 2nd frame)
+#   - max_threads: CPU threads for frame capture (4 recommended)
+#
+# DATABASE:
+#   - retention_days: Auto-delete events older than this
+#   - backup_enabled: Automatic daily backups recommended

@@ -1,0 +1,41 @@
+# Core Dependencies
+opencv-python==4.8.1.78
+numpy==1.24.3
+scipy==1.11.3
+
+# Machine Learning and Object Detection
+torch==2.1.0
+torchvision==0.16.0
+ultralytics==8.0.200  # YOLOv8 for object detection
+tensorflow==2.14.0
+
+# Web Framework and API
+Flask==3.0.0
+Flask-CORS==4.0.0
+Flask-RESTful==0.3.10
+Flask-SQLAlchemy==3.1.1
+
+# Database
+SQLAlchemy==2.0.23
+SQLite3==3.44.0
+
+# Utilities
+python-dotenv==1.0.0
+Pillow==10.1.0
+requests==2.31.0
+pyyaml==6.0.1
+
+# Logging and Monitoring
+python-logging-loki==0.3.2
+
+# Performance and Async
+aiohttp==3.9.1
+asyncio==3.4.3
+
+# Raspberry Pi specific
+RPi.GPIO==0.7.0  # GPIO control
+picamera2==0.3.12  # Official camera library for RPi
+
+# Additional Tools
+pytest==7.4.3
+pytest-cov==4.1.0

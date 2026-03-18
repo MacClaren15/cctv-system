@@ -1,0 +1,16 @@
+[Unit]
+Description=CCTV Motion Detection System
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/cctv_system
+ExecStart=/usr/bin/python3 /home/pi/cctv_system/main.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

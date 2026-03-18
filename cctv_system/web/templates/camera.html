@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Camera View - CCTV System</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+    <style>
+      .camera-full-container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        gap: 1rem;
+      }
+
+      .camera-full-stream {
+        flex: 1;
+        background: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+      }
+
+      .camera-full-stream img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      .camera-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+        background: white;
+        border-radius: var(--border-radius);
+      }
+
+      .camera-detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem;
+        border-bottom: 1px solid #eee;
+      }
+
+      .camera-detail-item label {
+        font-weight: 600;
+        color: var(--primary-color);
+      }
+
+      .camera-detail-item value {
+        color: var(--secondary-color);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>🎥 Camera: <span id="camera-name">{{ camera_name }}</span></h1>
+      <div id="status-indicator" class="status-indicator">
+        <span id="status-text">Loading...</span>
+      </div>
+    </header>
+
+    <nav>
+      <ul>
+        <li><a href="/">Dashboard</a></li>
+        <li><a href="/">Back to Dashboard</a></li>
+      </ul>
+    </nav>
+
+    <main class="camera-full-container">
+      <!-- Full-Screen Camera Stream -->
+      <div class="camera-full-stream">
+        <img id="camera-stream" src="" alt="Live camera stream" />
+      </div>
+
+      <!-- Camera Details -->
+      <div class="camera-details">
+        <div class="camera-detail-item">
+          <label>Resolution:</label>
+          <span id="detail-resolution">-</span>
+        </div>
+        <div class="camera-detail-item">
+          <label>FPS:</label>
+          <span id="detail-fps">-</span>
+        </div>
+        <div class="camera-detail-item">
+          <label>Frames Processed:</label>
+          <span id="detail-frames">-</span>
+        </div>
+        <div class="camera-detail-item">
+          <label>Motion Events:</label>
+          <span id="detail-motion">-</span>
+        </div>
+        <div class="camera-detail-item">
+          <label>Detections:</label>
+          <span id="detail-detections">-</span>
+        </div>
+        <div class="camera-detail-item">
+          <label>Status:</label>
+          <span id="detail-status">-</span>
+        </div>
+      </div>
+
+      <!-- Recent Events for this Camera -->
+      <section>
+        <h2>Recent Events</h2>
+        <table id="camera-events-table" class="event-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Type</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Events will be inserted here -->
+          </tbody>
+        </table>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        &copy; 2025 CCTV Motion Detection System | Camera:
+        <span id="footer-camera">{{ camera_name }}</span>
+      </p>
+    </footer>
+
+    <script>
+      const API_BASE = "/api/v1";
+      const CAMERA_NAME = "{{ camera_name }}";
+      let updateInterval;
+
+      // Initialize on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log(`Loading camera: ${CAMERA_NAME}`);
+
+        // Start camera stream
+        loadCameraStream();
+
+        // Load camera info
+        loadCameraInfo();
+
+        // Load events
+        loadCameraEvents();
+
+        // Auto-refresh every 5 seconds
+        updateInterval = setInterval(() => {
+          loadCameraInfo();
+          loadCameraEvents();
+        }, 5000);
+      });
+
+      // Load camera stream
+      function loadCameraStream() {
+        const img = document.getElementById("camera-stream");
+        img.src = `${API_BASE}/cameras/${CAMERA_NAME}/stream?t=${Date.now()}`;
+      }
+
+      // Load camera information
+      async function loadCameraInfo() {
+        try {
+          const response = await fetch(`${API_BASE}/cameras/${CAMERA_NAME}`);
+          const camera = await response.json();
+
+          const status = camera.is_running ? "Active" : "Inactive";
+          const statusColor = camera.is_running ? "#27ae60" : "#e74c3c";
+
+          document.getElementById("camera-name").textContent =
+            camera.name || CAMERA_NAME;
+          document.getElementById("detail-resolution").textContent =
+            `${camera.resolution[0]}x${camera.resolution[1]}`;
+          document.getElementById("detail-fps").textContent =
+            `${(camera.current_fps || 0).toFixed(2)} FPS`;
+          document.getElementById("detail-frames").textContent = formatNumber(
+            camera.frame_count,
+          );
+          document.getElementById("detail-status").textContent = status;
+          document.getElementById("detail-status").style.color = statusColor;
+
+          // Update status indicator
+          const statusIndicator = document.querySelector(".status-indicator");
+          if (camera.is_running) {
+            statusIndicator.classList.add("active");
+            document.getElementById("status-text").textContent = "Live";
+          } else {
+            statusIndicator.classList.remove("active");
+            document.getElementById("status-text").textContent = "Offline";
+          }
+        } catch (error) {
+          console.error("Error loading camera info:", error);
+        }
+      }
+
+      // Load camera events
+      async function loadCameraEvents() {
+        try {
+          const response = await fetch(`${API_BASE}/events?limit=200`);
+          const data = await response.json();
+
+          // Filter for this camera
+          const cameraEvents = data.recent_events.filter(
+            (e) => e.camera_name === CAMERA_NAME,
+          );
+
+          // Update stats
+          document.getElementById("detail-motion").textContent = formatNumber(
+            cameraEvents.filter((e) => e.event_type === "motion").length,
+          );
+          document.getElementById("detail-detections").textContent =
+            formatNumber(
+              cameraEvents.filter((e) => e.event_type === "detection").length,
+            );
+
+          // Render table
+          renderEventsTable(cameraEvents.slice(0, 50));
+        } catch (error) {
+          console.error("Error loading events:", error);
+        }
+      }
+
+      // Render events table
+      function renderEventsTable(events) {
+        const tbody = document.querySelector("#camera-events-table tbody");
+        tbody.innerHTML = "";
+
+        if (events.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="3" style="text-align: center; padding: 2rem;">No events</td></tr>';
+          return;
+        }
+
+        events.forEach((event) => {
+          const row = document.createElement("tr");
+          const date = new Date(event.timestamp);
+
+          row.innerHTML = `
+                    <td>${date.toLocaleString()}</td>
+                    <td><span class="event-badge ${event.event_type}">${event.event_type}</span></td>
+                    <td>${JSON.stringify(event.details || {}).substring(0, 50)}...</td>
+                `;
+
+          tbody.appendChild(row);
+        });
+      }
+
+      // Utility function
+      function formatNumber(num) {
+        if (num >= 1000000) {
+          return (num / 1000000).toFixed(1) + "M";
+        }
+        if (num >= 1000) {
+          return (num / 1000).toFixed(1) + "K";
+        }
+        return num.toString();
+      }
+
+      // Cleanup on unload
+      window.addEventListener("beforeunload", function () {
+        if (updateInterval) {
+          clearInterval(updateInterval);
+        }
+      });
+
+      // Refresh stream when clicking on it
+      document
+        .getElementById("camera-stream")
+        .addEventListener("click", function () {
+          loadCameraStream();
+        });
+    </script>
+  </body>
+</html>
