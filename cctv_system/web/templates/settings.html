@@ -836,96 +836,113 @@
           return;
         }
 
-        const settings = {
-          camera: {
-            fps: parseInt(document.getElementById("frameRateSlider").value),
-            brightness: parseInt(
-              document.getElementById("brightnessSlider").value,
-            ),
-            contrast: parseInt(document.getElementById("contrastSlider").value),
-            saturation: parseInt(
-              document.getElementById("saturationSlider").value,
-            ),
-          },
-          motion: {
-            enabled: document.getElementById("motionEnabled").checked,
-            method: document.getElementById("motionMethod").value,
-            sensitivity:
-              parseInt(document.getElementById("sensitivitySlider").value) /
-              100,
-            threshold: parseInt(
-              document.getElementById("thresholdSlider").value,
-            ),
-            alert: document.getElementById("motionAlert").checked,
-          },
-          recording: {
-            enabled: document.getElementById("autoRecording").checked,
-            duration: parseInt(
-              document.getElementById("recordDurationSlider").value,
-            ),
-            keep_days: parseInt(
-              document.getElementById("keepDaysSlider").value,
-            ),
-            storage_path: document.getElementById("recordingPath").value,
-            fallback_storage:
-              document.getElementById("fallbackStorage").checked,
-          },
-          alerts: {
-            sound: document.getElementById("soundAlerts").checked,
-            email: document.getElementById("emailAlerts").checked,
-            email_address: document.getElementById("emailAddress").value,
-            cooldown: parseInt(
-              document.getElementById("alertCooldownSlider").value,
-            ),
-          },
-          advanced: {
-            debug: document.getElementById("debugMode").checked,
-            port: parseInt(document.getElementById("webPort").value),
-            buffer_size: parseInt(
-              document.getElementById("bufferSizeSlider").value,
-            ),
-          },
-        };
+        try {
+          const settings = {
+            camera: {
+              fps:
+                parseInt(document.getElementById("frameRateSlider").value) ||
+                30,
+              brightness:
+                parseInt(document.getElementById("brightnessSlider").value) ||
+                50,
+              contrast:
+                parseInt(document.getElementById("contrastSlider").value) || 50,
+              saturation:
+                parseInt(document.getElementById("saturationSlider").value) ||
+                50,
+            },
+            motion: {
+              enabled: document.getElementById("motionEnabled").checked,
+              method: document.getElementById("motionMethod").value,
+              sensitivity:
+                (parseInt(document.getElementById("sensitivitySlider").value) ||
+                  50) / 100,
+              threshold:
+                parseInt(document.getElementById("thresholdSlider").value) ||
+                1000,
+              alert: document.getElementById("motionAlert").checked,
+            },
+            recording: {
+              enabled: document.getElementById("autoRecording").checked,
+              duration:
+                parseInt(
+                  document.getElementById("recordDurationSlider").value,
+                ) || 30,
+              keep_days:
+                parseInt(document.getElementById("keepDaysSlider").value) || 7,
+              storage_path:
+                document.getElementById("recordingPath").value || "",
+              fallback_storage:
+                document.getElementById("fallbackStorage").checked,
+            },
+            alerts: {
+              sound: document.getElementById("soundAlerts").checked,
+              email: document.getElementById("emailAlerts").checked,
+              email_address:
+                document.getElementById("emailAddress").value || "",
+              cooldown:
+                parseInt(
+                  document.getElementById("alertCooldownSlider").value,
+                ) || 30,
+            },
+            advanced: {
+              debug: document.getElementById("debugMode").checked,
+              port: parseInt(document.getElementById("webPort").value) || 5000,
+              buffer_size:
+                parseInt(document.getElementById("bufferSizeSlider").value) ||
+                5,
+            },
+          };
 
-        fetch("/api/v1/settings", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(settings),
-        })
-          .then((response) => {
-            if (!response.ok) {
-              return response
-                .json()
-                .then((data) => {
-                  throw new Error(
-                    data.error ||
+          // Validate settings object
+          const jsonStr = JSON.stringify(settings);
+          console.log("Settings to save:", settings);
+
+          fetch("/api/v1/settings", {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: jsonStr,
+          })
+            .then((response) => {
+              console.log("Response status:", response.status);
+              if (!response.ok) {
+                return response
+                  .json()
+                  .then((data) => {
+                    throw new Error(
+                      data.error ||
+                        `HTTP ${response.status}: ${response.statusText}`,
+                    );
+                  })
+                  .catch((jsonError) => {
+                    throw new Error(
                       `HTTP ${response.status}: ${response.statusText}`,
-                  );
-                })
-                .catch((jsonError) => {
-                  throw new Error(
-                    `HTTP ${response.status}: ${response.statusText}`,
-                  );
-                });
-            }
-            return response.json();
-          })
-          .then((data) => {
-            if (data.success) {
-              showAlert("✓ Settings saved successfully!", "success");
-            } else {
-              showAlert(
-                "Error: " + (data.message || "Failed to save settings"),
-                "error",
-              );
-            }
-          })
-          .catch((error) => {
-            showAlert("Error saving settings: " + error.message, "error");
-            console.error("Settings save error:", error);
-          });
+                    );
+                  });
+              }
+              return response.json();
+            })
+            .then((data) => {
+              console.log("Response data:", data);
+              if (data.success) {
+                showAlert("✓ Settings saved successfully!", "success");
+              } else {
+                showAlert(
+                  "Error: " + (data.message || "Failed to save settings"),
+                  "error",
+                );
+              }
+            })
+            .catch((error) => {
+              showAlert("Error saving settings: " + error.message, "error");
+              console.error("Settings save error:", error);
+            });
+        } catch (error) {
+          showAlert("Error preparing settings: " + error.message, "error");
+          console.error("Settings preparation error:", error);
+        }
       }
 
       function resetToDefaults() {
