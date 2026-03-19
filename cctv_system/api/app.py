@@ -415,38 +415,68 @@ def update_settings():
     try:
         data = request.get_json()
         
+        if not data:
+            return jsonify({
+                "success": False,
+                "message": "No JSON data provided"
+            }), 400
+        
+        logger.info(f"Updating settings with data keys: {list(data.keys())}")
+        
         # Update camera settings
         if 'camera' in data and config.CAMERAS:
-            config.CAMERAS[0]['fps'] = data['camera'].get('fps', 30)
-            config.CAMERAS[0]['brightness'] = data['camera'].get('brightness', 50)
+            try:
+                config.CAMERAS[0]['fps'] = data['camera'].get('fps', 30)
+                config.CAMERAS[0]['brightness'] = data['camera'].get('brightness', 50)
+                logger.debug("Camera settings updated")
+            except Exception as e:
+                logger.error(f"Error updating camera settings: {e}")
         
         # Update motion detection settings
         if 'motion' in data:
-            config.MOTION_DETECTION['enabled'] = data['motion'].get('enabled', True)
-            config.MOTION_DETECTION['method'] = data['motion'].get('method', 'background_subtraction')
-            config.MOTION_DETECTION['sensitivity'] = data['motion'].get('sensitivity', 0.3)
-            config.MOTION_DETECTION['threshold'] = data['motion'].get('threshold', 1000)
+            try:
+                config.MOTION_DETECTION['enabled'] = data['motion'].get('enabled', True)
+                config.MOTION_DETECTION['method'] = data['motion'].get('method', 'background_subtraction')
+                config.MOTION_DETECTION['sensitivity'] = data['motion'].get('sensitivity', 0.3)
+                config.MOTION_DETECTION['threshold'] = data['motion'].get('threshold', 1000)
+                logger.debug("Motion detection settings updated")
+            except Exception as e:
+                logger.error(f"Error updating motion settings: {e}")
         
         # Update recording settings
         if 'recording' in data:
-            config.RECORDING['enabled'] = data['recording'].get('enabled', False)
-            config.RECORDING['duration_seconds'] = data['recording'].get('duration', 30)
-            config.RECORDING['keep_days'] = data['recording'].get('keep_days', 7)
-            config.RECORDING['storage_path'] = data['recording'].get('storage_path', '/media/usb')
-            config.RECORDING['fallback_storage'] = data['recording'].get('fallback_storage', True)
+            try:
+                config.RECORDING['enabled'] = data['recording'].get('enabled', False)
+                config.RECORDING['duration_seconds'] = data['recording'].get('duration', 30)
+                config.RECORDING['keep_days'] = data['recording'].get('keep_days', 7)
+                config.RECORDING['storage_path'] = data['recording'].get('storage_path', '/media/usb')
+                config.RECORDING['fallback_storage'] = data['recording'].get('fallback_storage', True)
+                logger.debug("Recording settings updated")
+            except Exception as e:
+                logger.error(f"Error updating recording settings: {e}")
         
         # Update alert settings
         if 'alerts' in data:
-            config.ALERTS['sound'] = data['alerts'].get('sound', False)
-            config.ALERTS['email'] = data['alerts'].get('email', False)
-            config.ALERTS['email_address'] = data['alerts'].get('email_address', '')
-            config.ALERTS['cooldown_seconds'] = data['alerts'].get('cooldown', 30)
+            try:
+                config.ALERTS['sound'] = data['alerts'].get('sound', False)
+                config.ALERTS['email'] = data['alerts'].get('email', False)
+                config.ALERTS['email_address'] = data['alerts'].get('email_address', '')
+                config.ALERTS['cooldown_seconds'] = data['alerts'].get('cooldown', 30)
+                logger.debug("Alert settings updated")
+            except Exception as e:
+                logger.error(f"Error updating alert settings: {e}")
         
         # Update advanced settings
         if 'advanced' in data:
-            config.WEB['debug'] = data['advanced'].get('debug', False)
-            config.WEB['port'] = data['advanced'].get('port', 5000)
-            config.API['buffer_size'] = data['advanced'].get('buffer_size', 5)
+            try:
+                if hasattr(config, 'WEB') and config.WEB:
+                    config.WEB['debug'] = data['advanced'].get('debug', False)
+                    config.WEB['port'] = data['advanced'].get('port', 5000)
+                if hasattr(config, 'PERFORMANCE') and config.PERFORMANCE:
+                    config.PERFORMANCE['buffer_size'] = data['advanced'].get('buffer_size', 100)
+                logger.debug("Advanced settings updated")
+            except Exception as e:
+                logger.error(f"Error updating advanced settings: {e}")
         
         logger.info("Settings updated successfully")
         return jsonify({
@@ -454,10 +484,10 @@ def update_settings():
             "message": "Settings saved successfully"
         }), 200
     except Exception as e:
-        logger.error(f"Error updating settings: {e}")
+        logger.error(f"Error updating settings: {e}", exc_info=True)
         return jsonify({
             "success": False,
-            "message": str(e)
+            "message": f"Error updating settings: {str(e)}"
         }), 500
 
 
