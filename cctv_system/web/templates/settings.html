@@ -828,9 +828,9 @@
       function saveSettings() {
         // Show confirmation dialog
         const confirmed = confirm(
-          "Are you sure you want to save these settings? This will apply changes to the system."
+          "Are you sure you want to save these settings? This will apply changes to the system.",
         );
-        
+
         if (!confirmed) {
           showAlert("Settings save cancelled", "info");
           return;

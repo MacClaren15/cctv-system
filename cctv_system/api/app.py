@@ -442,6 +442,12 @@ def update_settings():
             config.ALERTS['email_address'] = data['alerts'].get('email_address', '')
             config.ALERTS['cooldown_seconds'] = data['alerts'].get('cooldown', 30)
         
+        # Update advanced settings
+        if 'advanced' in data:
+            config.WEB['debug'] = data['advanced'].get('debug', False)
+            config.WEB['port'] = data['advanced'].get('port', 5000)
+            config.API['buffer_size'] = data['advanced'].get('buffer_size', 5)
+        
         logger.info("Settings updated successfully")
         return jsonify({
             "success": True,
